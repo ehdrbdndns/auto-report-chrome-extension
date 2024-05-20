@@ -1,17 +1,10 @@
-let active = false;
+// Save default API suggestions
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  console.log('onInstalled', reason);
 
-function makeOrange(color: string): void {
-  document.body.style.backgroundColor = color;
-}
-
-chrome.action.onClicked.addListener((tab) => {
-  active = !active;
-  const color = active ? 'orange' : 'white';
-  chrome.scripting
-    .executeScript({
-      target: { tabId: tab.id ? tab.id : -1 },
-      func: makeOrange,
-      args: [color],
-    })
-    .then();
+  if (reason === 'install') {
+    chrome.storage.local.set({
+      apiSuggestions: ['tabs', 'storage', 'scripting'],
+    });
+  }
 });
