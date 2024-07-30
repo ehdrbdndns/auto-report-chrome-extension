@@ -2,9 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  font-size: 62.5%; /* 1rem = 10px */
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: "slnt" 0;
+}
+
 body {
   width: 720px;
   max-height: 700px;
   margin: 0;
   position: relative;
+
+}
+
+.text-xl {
+  font-size: 2rem;
+  line-height: 2.8rem;
+}
+
+.text-base {
+  font-size: 16rem;
+  line-height: 2.4rem;
+}
+
+.text-sm {
+  font-size: 1.4rem;
+  line-height: 2rem;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-normal {
+  font-weight: 400;
+}
+
+.primary-color {
+  color: #7A84DC;
+}
+
+.gray-900 {
+  color: #111827;
 }
