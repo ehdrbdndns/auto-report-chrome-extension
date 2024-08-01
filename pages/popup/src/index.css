@@ -57,6 +57,10 @@ body {
   color: #000000;
 }
 
+.white {
+  color: #FFFFFF;
+}
+
 .gray-200 {
   color: #EEEEEE;
 }
@@ -67,4 +71,8 @@ body {
 
 .bg-gray-200 {
   background-color: #EEEEEE;
+}
+
+.bg-primary-color {
+  background-color: #7A84DC;
 }
