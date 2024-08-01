@@ -25,8 +25,9 @@ const Popup = () => {
       <div className="flex gap-[1.6rem]">
         {/* Left */}
         <ContentWrapper title="추적중인 링크" titleActionEl={<Info />}>
-          <div>
-            <Link></Link>
+          <div className="gap-[0.8rem] max-h-[41.6rem] overflow-y-scroll">
+            <Link url="https://naver.com" />
+            <Link url="https://naver.com" />
           </div>
         </ContentWrapper>
         {/* Image */}
