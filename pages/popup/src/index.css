@@ -9,6 +9,7 @@ html {
   font-style: normal;
   font-variation-settings: "slnt" 0;
   padding: 2rem;
+  user-select: none;
 }
 
 body {
@@ -31,6 +32,10 @@ body {
 .text-sm {
   font-size: 1.4rem;
   line-height: 2rem;
+}
+
+.font-extrabold {
+  font-weight: 800;
 }
 
 .font-bold {
@@ -61,6 +66,10 @@ body {
   color: #FFFFFF;
 }
 
+.gray-50 {
+  color: #fafafa
+}
+
 .gray-200 {
   color: #EEEEEE;
 }
@@ -71,6 +80,10 @@ body {
 
 .bg-gray-200 {
   background-color: #EEEEEE;
+}
+
+.bg-gray-50 {
+  background-color: #fafafa;
 }
 
 .bg-primary-color {

@@ -3,6 +3,7 @@ import { withErrorBoundary, withSuspense } from '@extension/shared';
 import ContentWrapper from './components/ContentWrapper';
 import Link from './components/Link';
 import { SmallButton } from './components/Button';
+import Deck from './components/Deck';
 
 const RIGHT_IMG_PATH = 'popup/right-arrow.svg';
 const INFO_IMG_PATH = 'popup/info.svg';
@@ -34,7 +35,9 @@ const Popup = () => {
         {/* Image */}
         <img src={chrome.runtime.getURL(RIGHT_IMG_PATH)} alt="right arrow img" />
         {/* Right */}
-        <ContentWrapper title="분류한 링크" titleActionEl={<SmallButton text="자동분류" />}></ContentWrapper>
+        <ContentWrapper title="분류한 링크" titleActionEl={<SmallButton text="자동분류" />}>
+          <Deck />
+        </ContentWrapper>
       </div>
     </section>
   );

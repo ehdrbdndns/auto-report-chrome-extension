@@ -4,7 +4,7 @@ export default function Link({ favicon, url }: { favicon?: string; url: string }
   return (
     <div
       className={`
-        group flex items-center justify-between py-[0.6rem] px-[1.2rem] 
+        group/link link flex items-center justify-between py-[0.6rem] px-[1.2rem] 
         rounded-[0.7rem] hover:bg-gray-200 cursor-pointer
       `}>
       {/* Favicon */}
@@ -15,10 +15,10 @@ export default function Link({ favicon, url }: { favicon?: string; url: string }
           alt="URL favicon"
         />
         {/* URL */}
-        <span className="group-hover:font-bold text-sm">{url}</span>
+        <span className="group-hover/link:font-bold text-sm">{url}</span>
       </div>
       {/* Delete Button */}
-      <button className="group-hover:font-bold text-sm">x</button>
+      <button className="group-hover/link:font-bold text-sm">x</button>
     </div>
   );
 }
