@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import Link from './Link';
+import { PropsWithChildren, useState } from 'react';
 
 const TOGGLE_IMG_PATH = 'popup/toggle.svg';
 
-export default function Deck() {
+type DeckProps = PropsWithChildren<{ title: string }>;
+
+export default function Deck({ title, children }: DeckProps) {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -16,7 +17,7 @@ export default function Deck() {
         `}
         style={{ backgroundColor: '#DC9D7A' }}
         onClick={() => setIsOpen(prev => !prev)}>
-        <span className="text-sm font-bold white">카테고리 1</span>
+        <span className="text-sm font-bold white">{title}</span>
         <img
           className={`
           transition-transform duration-300
@@ -33,13 +34,7 @@ export default function Deck() {
           transition-[max-height] duration-500
           group-[.open]:max-h-[16rem] group-[.close]:max-h-[0]
         `}>
-        <div className="py-[1rem] px-[0.4rem] border bg-gray-50 gap-[0.4rem] rounded-[0.6rem]">
-          <Link url="https://naver.com" />
-          <Link url="https://naver.com" />
-          <Link url="https://naver.com" />
-          <Link url="https://naver.com" />
-          <Link url="https://naver.com" />
-        </div>
+        <div className="py-[1rem] px-[0.4rem] border bg-gray-50 gap-[0.4rem] rounded-[0.6rem]">{children}</div>
       </div>
     </div>
   );
