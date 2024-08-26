@@ -18,14 +18,16 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@extension/content-runtime-script": "workspace:*",
     "@extension/shared": "workspace:*",
     "@extension/storage": "workspace:*",
-    "@extension/content-runtime-script": "workspace:*",
-    "@types/node": "^20.14.10"
+    "@types/node": "^20.14.10",
+    "react-beautiful-dnd": "^13.1.1"
   },
   "devDependencies": {
     "@extension/tailwindcss-config": "workspace:*",
     "@extension/tsconfig": "workspace:*",
-    "@extension/vite-config": "workspace:*"
+    "@extension/vite-config": "workspace:*",
+    "@types/react-beautiful-dnd": "^13.1.8"
   }
 }
