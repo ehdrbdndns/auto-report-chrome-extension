@@ -1,5 +1,6 @@
 import 'webextension-polyfill';
-import { exampleThemeStorage } from '@extension/storage';
+import { exampleThemeStorage, tabStorage } from '@extension/storage';
+import { TabType } from '@extension/storage/lib/tabStorage';
 
 exampleThemeStorage.get().then(theme => {
   console.log('theme', theme);
@@ -16,9 +17,29 @@ chrome.tabs.onCreated.addListener(tab => {
 
 // when the tab is updated, call the function
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status !== 'complete') {
+    return;
+  }
+
   console.log('tab updated', tabId, changeInfo, tab);
-  // if tab Data has tabId, then follow the below steps
-  // 1.
+
+  // 1. get lastUsedTabId from tabStorage
+
+  // 2. update visitedCount and duration of lastUsedTab on UrlStorage
+
+  // 3. update lastUsedTabId from tabStorage
+
+  // 4. update tab data on tabStorage
+  const tabData: TabType[number] = {
+    id: tab.id || 0,
+    url: tab.url || '',
+    title: tab.title || '',
+    favIconUrl: tab.favIconUrl || '',
+    lastAccessed: tab.lastAccessed || 0,
+  };
+  tabStorage.updateTab(tabId, tabData);
+
+  // 5. update categoryData on categoryStorage
 });
 
 // when the tab is removed, call the function
