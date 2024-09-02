@@ -30,6 +30,7 @@ export type TabType = {
 type TabStorageType = BaseStorage<TabType> & {
   updateLastUsedTabId: (tabId: number) => Promise<void>;
   updateTab: (tabId: number, tabData: TabType[number]) => Promise<void>;
+  deleteTab: (tabId: number) => Promise<void>;
 };
 
 // Todo: subscribe for categoryData when it's updated
@@ -49,6 +50,12 @@ export const tabStorage: TabStorageType = {
   updateTab: async (tabId: number, tabData: TabType[number]) => {
     await storage.set(cache => {
       cache[tabId] = tabData;
+      return cache;
+    });
+  },
+  deleteTab: async (tabId: number) => {
+    await storage.set(cache => {
+      delete cache[tabId];
       return cache;
     });
   },
