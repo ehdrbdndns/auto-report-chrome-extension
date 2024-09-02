@@ -40,15 +40,6 @@ const storage = createStorage<TabType>('tab-storage-key', { lastUsedTabId: null 
 
 export const tabStorage: TabStorageType = {
   ...storage,
-  updateLastUsedTabId: async (tabId: number) => {
-    await storage.set(cache => {
-      if (cache.lastUsedTabId !== tabId) {
-        cache.lastUsedTabId = tabId;
-      }
-
-      return cache;
-    });
-  },
   updateTab: async (tabId: number, tabData: TabType[number]) => {
     await storage.set(cache => {
       cache[tabId] = tabData;
@@ -64,6 +55,15 @@ export const tabStorage: TabStorageType = {
   retrieveTab: async (tabId: number) => {
     return storage.get().then(tabData => {
       return tabData[tabId];
+    });
+  },
+  updateLastUsedTabId: async (tabId: number) => {
+    await storage.set(cache => {
+      if (cache.lastUsedTabId !== tabId) {
+        cache.lastUsedTabId = tabId;
+      }
+
+      return cache;
     });
   },
   getLatestTabId: async () => {
