@@ -1,5 +1,6 @@
 import 'webextension-polyfill';
 import { categoryStorage, exampleThemeStorage, linkStorage, tabStorage } from '@extension/storage';
+import { logStorage } from '@root/utils/background';
 
 exampleThemeStorage.get().then(theme => {
   console.log('theme', theme);
@@ -22,24 +23,18 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
   console.log('tab updated', tabId, changeInfo, tab);
 
-  // 1. get last used url from tabStorage
   const lastUsedUrl = await tabStorage.getLastUrl();
 
-  // 2. check if last used url is null
-  // 2-1. if null, updateUrl is tab.url
-  // 2-2. if not null, updateUrl is last used url
   const updateUrl = lastUsedUrl ?? tab.url;
 
   if (!updateUrl) {
     throw new Error('updateUrl is null');
   }
 
-  // 3. get linkData from linkStorage by updateUrl
   const linkData = await linkStorage.retrieveLink(updateUrl);
 
-  // 4. check if linkData is null
   if (!linkData) {
-    // 4-1. if null, create new linkData, and add linkOrder to default category
+    // create new linkData, and add linkOrder to default category
     await linkStorage.updateLink(updateUrl, {
       title: tab.title || tab.url,
       lastAccessedTime: Date.now(), // 13 digit
@@ -56,18 +51,16 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
     defaultCategory.linkOrder.push(updateUrl);
   } else {
-    // 4-2. if not null, update linkData with lastAccessedTime and duration
+    // 4-2. update linkData
     linkData.visitedCount += 1;
-    linkData.duration += tab.lastAccessed - linkData.lastAccessedTime;
+    linkData.duration += linkData.lastAccessedTime === 0 ? 0 : tab.lastAccessed - linkData.lastAccessedTime;
     linkData.lastAccessedTime = tab.lastAccessed;
 
     await linkStorage.updateLink(updateUrl, linkData);
   }
 
-  // 5. update last used url to tabStorage
   await tabStorage.updateLastUsedUrl(tab.url);
 
-  // 6. update tabStorage with tab data
   await tabStorage.updateTab(tab.id, {
     id: tab.id,
     url: tab.url,
@@ -76,19 +69,49 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     lastAccessedTime: tab.lastAccessed,
   });
 
-  // logging storage for test
-  // const logLinkData = await linkStorage.getSnapshot();
-  // const logTabData = await tabStorage.getSnapshot();
-  // console.log('logLinkData', logLinkData);
-  // console.log('logTabData', logTabData);
+  // log storage for test
+  logStorage();
 });
 
 // when the tab is removed, call the function
-chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
-  console.log('tab removed', tabId, removeInfo);
+chrome.tabs.onRemoved.addListener(async tabId => {
+  console.log('tab removed', tabId);
 
-  // if prev active tab equal tabId, update prev active tab of lastAccessed and duration
-  // remove prev active tab and tab
+  const tabData = await tabStorage.retrieveTab(tabId);
+
+  if (!tabData) {
+    throw new Error('tabData is null');
+  }
+
+  const lastUsedUrl = await tabStorage.getLastUrl();
+
+  if (!!lastUsedUrl && lastUsedUrl === tabData.url) {
+    // update lastAccessedTime and duration of linkData in linkStorage and delete last used url
+    const linkData = await linkStorage.retrieveLink(lastUsedUrl);
+
+    if (linkData !== undefined && linkData !== null) {
+      linkData.duration += Date.now() - linkData.lastAccessedTime;
+      linkData.lastAccessedTime = 0;
+
+      await linkStorage.updateLink(lastUsedUrl, linkData);
+    }
+
+    await tabStorage.updateLastUsedUrl('');
+  } else {
+    // update lastAccessedTime of linkData in linkStorage to 0
+    const linkData = await linkStorage.retrieveLink(tabData.url);
+
+    if (linkData !== undefined && linkData !== null) {
+      linkData.lastAccessedTime = 0;
+
+      await linkStorage.updateLink(tabData.url, linkData);
+    }
+  }
+
+  await tabStorage.deleteTab(tabId);
+
+  // log storage for test
+  logStorage();
 });
 
 // when the tab is activated, call the function
