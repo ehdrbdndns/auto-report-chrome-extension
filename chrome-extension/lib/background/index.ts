@@ -77,10 +77,10 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   });
 
   // logging storage for test
-  const logLinkData = await linkStorage.getSnapshot();
-  const logTabData = await tabStorage.getSnapshot();
-  console.log('logLinkData', logLinkData);
-  console.log('logTabData', logTabData);
+  // const logLinkData = await linkStorage.getSnapshot();
+  // const logTabData = await tabStorage.getSnapshot();
+  // console.log('logLinkData', logLinkData);
+  // console.log('logTabData', logTabData);
 });
 
 // when the tab is removed, call the function
