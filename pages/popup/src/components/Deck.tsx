@@ -34,7 +34,7 @@ export default function Deck({ title, children }: DeckProps) {
           transition-[max-height] duration-500
           group-[.open]:max-h-[16rem] group-[.close]:max-h-[0]
         `}>
-        <div className="py-[1rem] px-[0.4rem] border bg-gray-50 gap-[0.4rem] rounded-[0.6rem]">
+        <div className="py-[1rem] border bg-gray-50 gap-[0.4rem] rounded-[0.6rem]">
           {/* Internal Data */}
           {children}
         </div>

@@ -8,40 +8,26 @@ import Deck from './components/Deck';
 import { useEffect, useState } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import type { DropResult } from 'react-beautiful-dnd';
-
-const RIGHT_IMG_PATH = 'popup/right-arrow.svg';
-const INFO_IMG_PATH = 'popup/info.svg';
-
-type LinkType = { [id: string]: { url: string; id: string } };
-type CategoryType = { [category: string]: { title: string; linkOrder: string[] } };
-
-const Info = () => {
-  return (
-    <div className="hover:cursor-pointer">
-      <img src={chrome.runtime.getURL(INFO_IMG_PATH)} alt="info img" />
-    </div>
-  );
-};
+import { CategoryType, LinkType } from './type';
+import { RIGHT_IMG_PATH } from './variables';
+import Info from './components/Info';
 
 const Popup = () => {
   // Mock Data State Start
   const [linkData, setLinkData] = useState<LinkType>({
-    '1': { url: 'https://google.com1', id: '1' },
-    '2': { url: 'https://google.com2', id: '2' },
-    '3': { url: 'https://google.com3', id: '3' },
-    '4': { url: 'https://test.com4', id: '4' },
-    '5': { url: 'https://tistory.com5', id: '5' },
-    '6': { url: 'https://youtube.com6', id: '6' },
-    '7': { url: 'https://google.com7', id: '7' },
-    '8': { url: 'https://google.com8', id: '8' },
-    '9': { url: 'https://google.com9', id: '9' },
-    '10': { url: 'https://google.com10', id: '10' },
+    'https://google.com1': { id: '1', title: '제목1', lastAccessed: 0, favIconUrl: '', visitedCount: 0, duration: 0 },
+    'https://google.com2': { id: '2', title: '제목2', lastAccessed: 0, favIconUrl: '', visitedCount: 0, duration: 0 },
+    'https://google.com3': { id: '3', title: '제목3', lastAccessed: 0, favIconUrl: '', visitedCount: 0, duration: 0 },
+    'https://google.com4': { id: '4', title: '제목4', lastAccessed: 0, favIconUrl: '', visitedCount: 0, duration: 0 },
+    'https://google.com5': { id: '5', title: '제목5', lastAccessed: 0, favIconUrl: '', visitedCount: 0, duration: 0 },
+    'https://google.com6': { id: '6', title: '제목6', lastAccessed: 0, favIconUrl: '', visitedCount: 0, duration: 0 },
+    'https://google.com7': { id: '7', title: '제목6', lastAccessed: 0, favIconUrl: '', visitedCount: 0, duration: 0 },
   });
 
   const [categoryData, setCategoryData] = useState<CategoryType>({
-    default: { title: '방문한 링크', linkOrder: ['1', '2', '3'] },
-    '카테고리 1': { title: '카테고리 1', linkOrder: ['4', '5', '6'] },
-    '카테고리 2': { title: '카테고리 2', linkOrder: ['7', '8', '9', '10'] },
+    default: { title: '방문한 링크', linkOrder: ['https://google.com1', 'https://google.com2', 'https://google.com3'] },
+    '카테고리 1': { title: '카테고리 1', linkOrder: ['https://google.com4', 'https://google.com5'] },
+    '카테고리 2': { title: '카테고리 2', linkOrder: ['https://google.com6', 'https://google.com7'] },
   });
   // Mock Data State End
 
@@ -104,11 +90,15 @@ const Popup = () => {
                   className="gap-[0.8rem] max-h-[41.6rem] min-h-[40rem] overflow-y-scroll"
                   ref={provided.innerRef}
                   {...provided.droppableProps}>
-                  {categoryData['default']['linkOrder'].map((linkIndex, index) => (
-                    <Draggable key={`default-${linkIndex}`} draggableId={`default-link-${linkIndex}`} index={index}>
+                  {categoryData['default']['linkOrder'].map((url, index) => (
+                    <Draggable key={`default-${url}`} draggableId={`default-link-${url}`} index={index}>
                       {provided => (
                         <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                          <Link key={`default-${index}`} url={linkData[linkIndex].url || ''} />
+                          <Link
+                            key={`default-${index}`}
+                            title={linkData[url].title}
+                            favIconUrl={linkData[url].favIconUrl}
+                          />
                         </div>
                       )}
                     </Draggable>
@@ -129,16 +119,20 @@ const Popup = () => {
                   <Deck key={category} title={title}>
                     <Droppable droppableId={category}>
                       {provided => (
-                        <div ref={provided.innerRef} {...provided.droppableProps}>
+                        <div className="min-h-10" ref={provided.innerRef} {...provided.droppableProps}>
                           {/* Dropable */}
-                          {linkOrder.map((linkIndex, index) => (
+                          {linkOrder.map((url, index) => (
                             <Draggable
                               key={`${title}-link-${index}`}
                               draggableId={`${title}-link-${index}`}
                               index={index}>
                               {provided => (
                                 <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                                  <Link key={`sorted-link-${title}-${linkIndex}`} url={linkData[linkIndex].url || ''} />
+                                  <Link
+                                    key={`sorted-link-${title}-${url}`}
+                                    title={linkData[url].title}
+                                    favIconUrl={linkData[url].favIconUrl}
+                                  />
                                 </div>
                               )}
                             </Draggable>
