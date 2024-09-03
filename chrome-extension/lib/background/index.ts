@@ -1,6 +1,5 @@
 import 'webextension-polyfill';
-import { exampleThemeStorage, tabStorage } from '@extension/storage';
-import { TabType } from '@extension/storage/lib/tabStorage';
+import { categoryStorage, exampleThemeStorage, linkStorage, tabStorage } from '@extension/storage';
 
 exampleThemeStorage.get().then(theme => {
   console.log('theme', theme);
@@ -16,30 +15,72 @@ chrome.tabs.onCreated.addListener(tab => {
 });
 
 // when the tab is updated, call the function
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status !== 'complete') {
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo.status !== 'complete' || !tab.lastAccessed || !tab.url || !tab.id) {
     return;
   }
 
   console.log('tab updated', tabId, changeInfo, tab);
 
-  // 1. get lastUsedTabId from tabStorage
+  // 1. get last used url from tabStorage
+  const lastUsedUrl = await tabStorage.getLastUrl();
 
-  // 2. update visitedCount and duration of lastUsedTab on UrlStorage
+  // 2. check if last used url is null
+  // 2-1. if null, updateUrl is tab.url
+  // 2-2. if not null, updateUrl is last used url
+  const updateUrl = lastUsedUrl ?? tab.url;
 
-  // 3. update lastUsedTabId from tabStorage
+  if (!updateUrl) {
+    throw new Error('updateUrl is null');
+  }
 
-  // 4. update tab data on tabStorage
-  const tabData: TabType[number] = {
-    id: tab.id || 0,
-    url: tab.url || '',
-    title: tab.title || '',
+  // 3. get linkData from linkStorage by updateUrl
+  const linkData = await linkStorage.retrieveLink(updateUrl);
+
+  // 4. check if linkData is null
+  if (!linkData) {
+    // 4-1. if null, create new linkData, and add linkOrder to default category
+    await linkStorage.updateLink(updateUrl, {
+      title: tab.title || tab.url,
+      lastAccessedTime: Date.now(), // 13 digit
+      favIconUrl: tab.favIconUrl || '',
+      visitedCount: 1,
+      duration: 0,
+    });
+
+    const defaultCategory = await categoryStorage.retrieveCategory('default');
+
+    if (!defaultCategory) {
+      throw new Error('default category is null');
+    }
+
+    defaultCategory.linkOrder.push(updateUrl);
+  } else {
+    // 4-2. if not null, update linkData with lastAccessedTime and duration
+    linkData.visitedCount += 1;
+    linkData.duration += tab.lastAccessed - linkData.lastAccessedTime;
+    linkData.lastAccessedTime = tab.lastAccessed;
+
+    await linkStorage.updateLink(updateUrl, linkData);
+  }
+
+  // 5. update last used url to tabStorage
+  await tabStorage.updateLastUsedUrl(tab.url);
+
+  // 6. update tabStorage with tab data
+  await tabStorage.updateTab(tab.id, {
+    id: tab.id,
+    url: tab.url,
+    title: tab.title || tab.url,
     favIconUrl: tab.favIconUrl || '',
-    lastAccessed: tab.lastAccessed || 0,
-  };
-  tabStorage.updateTab(tabId, tabData);
+    lastAccessedTime: tab.lastAccessed,
+  });
 
-  // 5. update categoryData on categoryStorage
+  // logging storage for test
+  const logLinkData = await linkStorage.getSnapshot();
+  const logTabData = await tabStorage.getSnapshot();
+  console.log('logLinkData', logLinkData);
+  console.log('logTabData', logTabData);
 });
 
 // when the tab is removed, call the function

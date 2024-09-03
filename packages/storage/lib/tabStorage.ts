@@ -7,7 +7,7 @@ export type TabType = {
     url: string;
     title: string;
     favIconUrl: string;
-    lastAccessed: number;
+    lastAccessedTime: number;
     // active: boolean,
     // audible: boolean,
     // autoDiscardable: boolean,
@@ -24,19 +24,19 @@ export type TabType = {
     // width: number
     // windowId: number
   };
-  lastUsedTabId: number | null;
+  lastUsedUrl?: string;
 };
 
 type TabStorageType = BaseStorage<TabType> & {
-  updateLastUsedTabId: (tabId: number) => Promise<void>;
   updateTab: (tabId: number, tabData: TabType[number]) => Promise<void>;
   deleteTab: (tabId: number) => Promise<void>;
-  retrieveTab: (tabId: number) => Promise<TabType[number]>;
-  getLatestTabId: () => Promise<number | null>;
+  retrieveTab: (tabId: number) => Promise<TabType[number] | undefined>;
+  updateLastUsedUrl: (url: string) => Promise<void>;
+  getLastUrl: () => Promise<string | undefined>;
 };
 
 // Todo: subscribe for categoryData when it's updated
-const storage = createStorage<TabType>('tab-storage-key', { lastUsedTabId: null });
+const storage = createStorage<TabType>('tab-storage-key', {});
 
 export const tabStorage: TabStorageType = {
   ...storage,
@@ -57,18 +57,16 @@ export const tabStorage: TabStorageType = {
       return tabData[tabId];
     });
   },
-  updateLastUsedTabId: async (tabId: number) => {
+  updateLastUsedUrl: async (url: string) => {
     await storage.set(cache => {
-      if (cache.lastUsedTabId !== tabId) {
-        cache.lastUsedTabId = tabId;
-      }
+      cache.lastUsedUrl = url;
 
       return cache;
     });
   },
-  getLatestTabId: async () => {
+  getLastUrl: async () => {
     return storage.get().then(tabData => {
-      return tabData.lastUsedTabId;
+      return tabData.lastUsedUrl;
     });
   },
 };
