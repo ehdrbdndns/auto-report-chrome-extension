@@ -30,9 +30,9 @@ export type TabType = {
 type TabStorageType = BaseStorage<TabType> & {
   updateTab: (tabId: number, tabData: TabType[number]) => Promise<void>;
   deleteTab: (tabId: number) => Promise<void>;
-  retrieveTab: (tabId: number) => Promise<TabType[number] | null | undefined>;
+  retrieveTab: (tabId: number) => Promise<TabType[number] | null>;
   updateLastUsedUrl: (url: string) => Promise<void>;
-  getLastUrl: () => Promise<string | null | undefined>;
+  getLastUrl: () => Promise<string | null>;
 };
 
 // Todo: subscribe for categoryData when it's updated

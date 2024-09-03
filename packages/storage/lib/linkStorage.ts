@@ -13,7 +13,7 @@ export type LinkType = {
 type LinkStorage = BaseStorage<LinkType> & {
   updateLink: (url: string, linkData: LinkType[string]) => Promise<void>;
   deleteLink: (url: string) => Promise<void>;
-  retrieveLink: (url: string) => Promise<LinkType[string] | null | undefined>;
+  retrieveLink: (url: string) => Promise<LinkType[string] | null>;
 };
 
 const storage = createStorage<LinkType>('url-storage-key', {});
