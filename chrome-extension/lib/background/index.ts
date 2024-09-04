@@ -1,6 +1,6 @@
 import 'webextension-polyfill';
-import { categoryStorage, exampleThemeStorage, linkStorage, tabStorage } from '@extension/storage';
-import { logStorage } from '@root/utils/background';
+import { exampleThemeStorage, linkStorage, tabStorage } from '@extension/storage';
+import { createLinkWithCategory, getCurrentTab, logStorage } from '@root/utils/background';
 
 exampleThemeStorage.get().then(theme => {
   console.log('theme', theme);
@@ -25,43 +25,38 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
   const lastUsedUrl = await tabStorage.getLastUrl();
 
-  const updateUrl = lastUsedUrl ?? tab.url;
+  if (lastUsedUrl !== null) {
+    const linkData = await linkStorage.retrieveLink(lastUsedUrl);
 
-  if (!updateUrl) {
-    throw new Error('updateUrl is null');
+    if (linkData !== null) {
+      linkData.duration += Date.now() - linkData.lastAccessedTime;
+      linkData.lastAccessedTime = 0;
+
+      await linkStorage.updateLink(lastUsedUrl, linkData);
+    }
   }
 
-  const linkData = await linkStorage.retrieveLink(updateUrl);
+  const linkData = await linkStorage.retrieveLink(tab.url);
 
   if (!linkData) {
     // create new linkData, and add linkOrder to default category
-    await linkStorage.updateLink(updateUrl, {
+    await createLinkWithCategory({
+      url: tab.url,
       title: tab.title || tab.url,
-      lastAccessedTime: Date.now(), // 13 digit
       favIconUrl: tab.favIconUrl || '',
-      visitedCount: 1,
-      duration: 0,
     });
-
-    const defaultCategory = await categoryStorage.retrieveCategory('default');
-
-    if (!defaultCategory) {
-      throw new Error('default category is null');
-    }
-
-    defaultCategory.linkOrder.push(updateUrl);
   } else {
     // 4-2. update linkData
     linkData.visitedCount += 1;
     linkData.duration += linkData.lastAccessedTime === 0 ? 0 : tab.lastAccessed - linkData.lastAccessedTime;
     linkData.lastAccessedTime = tab.lastAccessed;
+    linkData.favIconUrl = tab.favIconUrl || '';
 
-    await linkStorage.updateLink(updateUrl, linkData);
+    await linkStorage.updateLink(tab.url, linkData);
   }
 
   await tabStorage.updateLastUsedUrl(tab.url);
-
-  await tabStorage.updateTab(tab.id, {
+  await tabStorage.updateTab(tabId, {
     id: tab.id,
     url: tab.url,
     title: tab.title || tab.url,
@@ -77,21 +72,29 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 chrome.tabs.onRemoved.addListener(async tabId => {
   console.log('tab removed', tabId);
 
+  // Todo: fix currentUrl, because it's not removed tab's url
   const tabData = await tabStorage.retrieveTab(tabId);
 
   if (!tabData) {
     throw new Error('tabData is null');
   }
 
+  const { url: removedUrl, favIconUrl } = tabData;
+
+  await tabStorage.deleteTab(tabId);
+
+  console.log("removed tab's url", removedUrl);
+
   const lastUsedUrl = await tabStorage.getLastUrl();
 
-  if (!!lastUsedUrl && lastUsedUrl === tabData.url) {
+  if (lastUsedUrl === removedUrl) {
     // update lastAccessedTime and duration of linkData in linkStorage and delete last used url
     const linkData = await linkStorage.retrieveLink(lastUsedUrl);
 
     if (linkData !== undefined && linkData !== null) {
       linkData.duration += Date.now() - linkData.lastAccessedTime;
       linkData.lastAccessedTime = 0;
+      linkData.visitedCount--;
 
       await linkStorage.updateLink(lastUsedUrl, linkData);
     }
@@ -99,16 +102,15 @@ chrome.tabs.onRemoved.addListener(async tabId => {
     await tabStorage.updateLastUsedUrl('');
   } else {
     // update lastAccessedTime of linkData in linkStorage to 0
-    const linkData = await linkStorage.retrieveLink(tabData.url);
+    const linkData = await linkStorage.retrieveLink(removedUrl);
 
-    if (linkData !== undefined && linkData !== null) {
+    if (linkData !== null) {
       linkData.lastAccessedTime = 0;
+      linkData.favIconUrl = !linkData.favIconUrl ? favIconUrl : linkData.favIconUrl;
 
-      await linkStorage.updateLink(tabData.url, linkData);
+      await linkStorage.updateLink(removedUrl, linkData);
     }
   }
-
-  await tabStorage.deleteTab(tabId);
 
   // log storage for test
   logStorage();
@@ -132,39 +134,25 @@ chrome.tabs.onActivated.addListener(async activeInfo => {
     }
   }
 
-  const [tabData] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  const { url, title, favIconUrl } = await getCurrentTab();
 
-  if (!tabData || !tabData.url) {
-    console.log('tabData: ' + tabData);
-    throw new Error('tabData is null');
-  }
-
-  const linkData = await linkStorage.retrieveLink(tabData.url);
+  const linkData = await linkStorage.retrieveLink(url);
 
   if (!linkData) {
-    await linkStorage.updateLink(tabData.url, {
-      title: tabData.title || '',
-      lastAccessedTime: Date.now(),
-      favIconUrl: tabData.favIconUrl || '',
-      visitedCount: 1,
-      duration: 0,
+    await createLinkWithCategory({
+      title: title || url,
+      url: url,
+      favIconUrl: favIconUrl || '',
     });
-
-    const defaultCategory = await categoryStorage.retrieveCategory('default');
-
-    if (!defaultCategory) {
-      throw new Error('defaultCategory is null');
-    }
-
-    defaultCategory.linkOrder.push(tabData.url);
   } else {
     linkData.lastAccessedTime = Date.now();
+    linkData.favIconUrl = !linkData.favIconUrl ? favIconUrl : linkData.favIconUrl;
 
-    await linkStorage.updateLink(tabData.url, linkData);
+    await linkStorage.updateLink(url, linkData);
   }
 
   // update last used url to current tab url
-  await tabStorage.updateLastUsedUrl(tabData.url);
+  await tabStorage.updateLastUsedUrl(url);
 
   // log storage for test
   logStorage();
