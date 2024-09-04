@@ -115,10 +115,57 @@ chrome.tabs.onRemoved.addListener(async tabId => {
 });
 
 // when the tab is activated, call the function
-chrome.tabs.onActivated.addListener(activeInfo => {
+chrome.tabs.onActivated.addListener(async activeInfo => {
   console.log('tab activated', activeInfo);
 
-  // if tab Data has activeInfo, then follow the below steps
-  // 1. update prev active tab of lastAccessed and duration
-  // 2. and update prev active tab to current active tab
+  // update last used url data
+  const lastUsedUrl = await tabStorage.getLastUrl();
+
+  if (lastUsedUrl !== null) {
+    const linkData = await linkStorage.retrieveLink(lastUsedUrl);
+
+    if (linkData !== null) {
+      linkData.duration += Date.now() - linkData.lastAccessedTime;
+      linkData.lastAccessedTime = Date.now();
+
+      await linkStorage.updateLink(lastUsedUrl, linkData);
+    }
+  }
+
+  const [tabData] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+
+  if (!tabData || !tabData.url) {
+    console.log('tabData: ' + tabData);
+    throw new Error('tabData is null');
+  }
+
+  const linkData = await linkStorage.retrieveLink(tabData.url);
+
+  if (!linkData) {
+    await linkStorage.updateLink(tabData.url, {
+      title: tabData.title || '',
+      lastAccessedTime: Date.now(),
+      favIconUrl: tabData.favIconUrl || '',
+      visitedCount: 1,
+      duration: 0,
+    });
+
+    const defaultCategory = await categoryStorage.retrieveCategory('default');
+
+    if (!defaultCategory) {
+      throw new Error('defaultCategory is null');
+    }
+
+    defaultCategory.linkOrder.push(tabData.url);
+  } else {
+    linkData.lastAccessedTime = Date.now();
+
+    await linkStorage.updateLink(tabData.url, linkData);
+  }
+
+  // update last used url to current tab url
+  await tabStorage.updateLastUsedUrl(tabData.url);
+
+  // log storage for test
+  logStorage();
 });
