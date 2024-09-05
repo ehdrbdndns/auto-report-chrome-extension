@@ -7,7 +7,7 @@ export type CategoryType = {
   };
 };
 
-type CategoryStorageType = BaseStorage<CategoryType> & {
+export type CategoryStorageType = BaseStorage<CategoryType> & {
   updateCategory: (category: string, categoryData: CategoryType[string]) => Promise<void>;
   deleteCategory: (category: string) => Promise<void>;
   retrieveCategory: (category: string) => Promise<CategoryType[string] | null>;

@@ -15,8 +15,8 @@ html {
 body {
   width: 687px;
   margin: 0;
-  position: relative;
-
+  /* position: relative; */
+  /* overflow-y: hidden; */
 }
 
 .text-xl {
