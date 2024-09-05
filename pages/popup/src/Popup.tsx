@@ -83,7 +83,7 @@ const Popup = () => {
             <ContentWrapper title="추적한 링크" titleActionEl={<Info />}>
               <Droppable droppableId="default">
                 {provided => (
-                  <div className="h-[41.6rem] overflow-y-scroll" ref={provided.innerRef} {...provided.droppableProps}>
+                  <div ref={provided.innerRef} {...provided.droppableProps}>
                     {categoryState['default']['linkOrder'].map((url, index) => (
                       <Draggable key={`default-${url}`} draggableId={`default-link-${url}`} index={index}>
                         {provided => (

@@ -14,7 +14,7 @@ const ContentWrapper = ({ title, titleActionEl, children }: ContentWrapperProps)
       </header>
       <hr className="w-100 my-3 border-t border-[#4B5563]" />
       {/* Content With Scroll able */}
-      <div>{children}</div>
+      <div className="h-[41.6rem] overflow-auto">{children}</div>
     </aside>
   );
 };
