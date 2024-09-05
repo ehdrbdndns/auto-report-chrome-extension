@@ -1,41 +1,35 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import '@src/Popup.css';
-import { withErrorBoundary, withSuspense } from '@extension/shared';
-import ContentWrapper from './components/ContentWrapper';
-import Link from './components/Link';
-import { SmallButton } from './components/Button';
-import Deck from './components/Deck';
 import { useEffect, useState } from 'react';
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+
+import '@src/Popup.css';
+import { Tooltip } from 'flowbite-react';
 import type { DropResult } from 'react-beautiful-dnd';
-import { CategoryType, LinkType } from './type';
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import { useStorageSuspense, withErrorBoundary, withSuspense } from '@extension/shared';
+import { categoryStorage, linkStorage } from '@extension/storage';
+
 import { RIGHT_IMG_PATH } from './variables';
+
+import Deck from './components/Deck';
 import Info from './components/Info';
+import Link from './components/Link';
+import TooltipContent from './components/TooltipContent';
+import { SmallButton } from './components/Button';
+import ContentWrapper from './components/ContentWrapper';
 
 const Popup = () => {
-  // Mock Data State Start
-  const [linkData, setLinkData] = useState<LinkType>({
-    'https://google.com1': { id: '1', title: '제목1', lastAccessed: 0, favIconUrl: '', visitedCount: 0, duration: 0 },
-    'https://google.com2': { id: '2', title: '제목2', lastAccessed: 0, favIconUrl: '', visitedCount: 0, duration: 0 },
-    'https://google.com3': { id: '3', title: '제목3', lastAccessed: 0, favIconUrl: '', visitedCount: 0, duration: 0 },
-    'https://google.com4': { id: '4', title: '제목4', lastAccessed: 0, favIconUrl: '', visitedCount: 0, duration: 0 },
-    'https://google.com5': { id: '5', title: '제목5', lastAccessed: 0, favIconUrl: '', visitedCount: 0, duration: 0 },
-    'https://google.com6': { id: '6', title: '제목6', lastAccessed: 0, favIconUrl: '', visitedCount: 0, duration: 0 },
-    'https://google.com7': { id: '7', title: '제목6', lastAccessed: 0, favIconUrl: '', visitedCount: 0, duration: 0 },
-  });
-
-  const [categoryData, setCategoryData] = useState<CategoryType>({
-    default: { title: '방문한 링크', linkOrder: ['https://google.com1', 'https://google.com2', 'https://google.com3'] },
-    '카테고리 1': { title: '카테고리 1', linkOrder: ['https://google.com4', 'https://google.com5'] },
-    '카테고리 2': { title: '카테고리 2', linkOrder: ['https://google.com6', 'https://google.com7'] },
-  });
-  // Mock Data State End
+  const linkData = useStorageSuspense(linkStorage);
+  const categoryData = useStorageSuspense(categoryStorage);
 
   // --- requestAnimationFrame 초기화
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
-    const animation = requestAnimationFrame(() => setEnabled(true));
+    const animation = requestAnimationFrame(() => {
+      // console.log(categoryData);
+      // console.log(linkData);
+      setEnabled(true);
+    });
 
     return () => {
       cancelAnimationFrame(animation);
@@ -61,16 +55,16 @@ const Popup = () => {
     const linkIndexOfSource = categoryData[sourceId].linkOrder[sourceIndex];
 
     // delete source link
-    setCategoryData(prev => {
-      prev[sourceId].linkOrder.splice(sourceIndex, 1);
-      return { ...prev };
-    });
+    // setCategoryData(prev => {
+    //   prev[sourceId].linkOrder.splice(sourceIndex, 1);
+    //   return { ...prev };
+    // });
 
     // add link order to destination
-    setCategoryData(prev => {
-      prev[destinationId].linkOrder.splice(destinationIndex, 0, linkIndexOfSource);
-      return { ...prev };
-    });
+    // setCategoryData(prev => {
+    //   prev[destinationId].linkOrder.splice(destinationIndex, 0, linkIndexOfSource);
+    //   return { ...prev };
+    // });
   };
 
   return (
@@ -93,12 +87,25 @@ const Popup = () => {
                   {categoryData['default']['linkOrder'].map((url, index) => (
                     <Draggable key={`default-${url}`} draggableId={`default-link-${url}`} index={index}>
                       {provided => (
-                        <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                          <Link
-                            key={`default-${index}`}
-                            title={linkData[url].title}
-                            favIconUrl={linkData[url].favIconUrl}
-                          />
+                        <div
+                          className="[&>.w-fit]:w-[100%]"
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}>
+                          <Tooltip
+                            content={
+                              <TooltipContent
+                                title={linkData[url].title}
+                                duration={linkData[url].duration}
+                                visitedCount={linkData[url].visitedCount}
+                              />
+                            }>
+                            <Link
+                              key={`default-${index}`}
+                              title={linkData[url].title}
+                              favIconUrl={linkData[url].favIconUrl}
+                            />
+                          </Tooltip>
                         </div>
                       )}
                     </Draggable>

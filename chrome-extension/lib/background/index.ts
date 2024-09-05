@@ -51,6 +51,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     linkData.duration += linkData.lastAccessedTime === 0 ? 0 : tab.lastAccessed - linkData.lastAccessedTime;
     linkData.lastAccessedTime = tab.lastAccessed;
     linkData.favIconUrl = tab.favIconUrl || '';
+    linkData.title = tab.title || tab.url;
 
     await linkStorage.updateLink(tab.url, linkData);
   }
@@ -91,10 +92,11 @@ chrome.tabs.onRemoved.addListener(async tabId => {
     // update lastAccessedTime and duration of linkData in linkStorage and delete last used url
     const linkData = await linkStorage.retrieveLink(lastUsedUrl);
 
-    if (linkData !== undefined && linkData !== null) {
+    if (linkData !== null) {
       linkData.duration += Date.now() - linkData.lastAccessedTime;
       linkData.lastAccessedTime = 0;
       linkData.visitedCount--;
+      linkData.title = linkData.title || lastUsedUrl;
 
       await linkStorage.updateLink(lastUsedUrl, linkData);
     }
@@ -107,6 +109,7 @@ chrome.tabs.onRemoved.addListener(async tabId => {
     if (linkData !== null) {
       linkData.lastAccessedTime = 0;
       linkData.favIconUrl = !linkData.favIconUrl ? favIconUrl : linkData.favIconUrl;
+      linkData.title = linkData.title || removedUrl;
 
       await linkStorage.updateLink(removedUrl, linkData);
     }
@@ -129,6 +132,7 @@ chrome.tabs.onActivated.addListener(async activeInfo => {
     if (linkData !== null) {
       linkData.duration += Date.now() - linkData.lastAccessedTime;
       linkData.lastAccessedTime = Date.now();
+      linkData.title = linkData.title || lastUsedUrl;
 
       await linkStorage.updateLink(lastUsedUrl, linkData);
     }
@@ -147,6 +151,7 @@ chrome.tabs.onActivated.addListener(async activeInfo => {
   } else {
     linkData.lastAccessedTime = Date.now();
     linkData.favIconUrl = !linkData.favIconUrl ? favIconUrl : linkData.favIconUrl;
+    linkData.title = linkData.title || title || url;
 
     await linkStorage.updateLink(url, linkData);
   }

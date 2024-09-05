@@ -1,13 +1,17 @@
 import { categoryStorage, linkStorage, tabStorage } from '@extension/storage';
 
+const isDev = false;
+
 const logStorage = async () => {
   // logging storage for test
-  const linkData = linkStorage.getSnapshot();
-  const tabData = tabStorage.getSnapshot();
-  const categoryData = categoryStorage.getSnapshot();
-  console.log('linkData', linkData);
-  console.log('tabData', tabData);
-  console.log('categoryData', categoryData);
+  if (isDev) {
+    const linkData = linkStorage.getSnapshot();
+    const tabData = tabStorage.getSnapshot();
+    const categoryData = categoryStorage.getSnapshot();
+    console.log('linkData', linkData);
+    console.log('tabData', tabData);
+    console.log('categoryData', categoryData);
+  }
 };
 
 const createLinkWithCategory = async ({
@@ -34,6 +38,7 @@ const createLinkWithCategory = async ({
   }
 
   defaultCategory.linkOrder.push(url);
+  await categoryStorage.updateCategory('default', defaultCategory);
 };
 
 const getCurrentTab = async () => {
