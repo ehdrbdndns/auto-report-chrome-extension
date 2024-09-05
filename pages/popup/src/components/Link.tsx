@@ -1,6 +1,9 @@
 const DEFULAT_FAVICON_IMG_PATH = 'popup/default-favicon.png';
 
 export default function Link({ title, favIconUrl }: { title: string; favIconUrl?: string }) {
+  const MAX_TITLE_LENGTH = 25;
+  const truncatedTitle = title.length > MAX_TITLE_LENGTH ? title.slice(0, MAX_TITLE_LENGTH) + '...' : title;
+
   return (
     <div
       className={`
@@ -18,14 +21,14 @@ export default function Link({ title, favIconUrl }: { title: string; favIconUrl?
         <span
           className={`
             block
-            group-hover/link:font-bold text-sm whitespace-nowrap
+            text-sm whitespace-nowrap
             overflow-hidden overflow-ellipsis
       `}>
-          {title}
+          {truncatedTitle}
         </span>
       </div>
       {/* Delete Button */}
-      <button className="group-hover/link:font-bold text-sm">x</button>
+      <button className="text-sm">x</button>
     </div>
   );
 }
