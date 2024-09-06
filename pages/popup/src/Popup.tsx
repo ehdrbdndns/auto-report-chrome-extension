@@ -17,6 +17,7 @@ import Link from './components/Link';
 import TooltipContent from './components/TooltipContent';
 import { SmallButton } from './components/Button';
 import ContentWrapper from './components/ContentWrapper';
+import CreateCategoryModal from './components/CreateCategoryModal';
 
 const Popup = () => {
   const linkData = useStorageSuspense(linkStorage);
@@ -25,6 +26,7 @@ const Popup = () => {
 
   useEffect(() => {
     setCategoryState(categoryData);
+    console.log(categoryData);
   }, [categoryData]);
 
   // --- requestAnimationFrame 초기화
@@ -77,6 +79,21 @@ const Popup = () => {
       deleteLinkOrderIndex: index,
     });
     await linkStorage.deleteLink(url);
+
+    const categoryData = await categoryStorage.get();
+    setCategoryState(categoryData);
+  };
+
+  const handleCreateCategory = async (category: string, error: (message: string) => void) => {
+    if (categoryState[category]) {
+      error('이미 존재하는 카테고리입니다.');
+      throw new Error('이미 존재하는 카테고리입니다.');
+    }
+
+    await categoryStorage.updateCategory(category, {
+      title: category,
+      linkOrder: [],
+    });
 
     const categoryData = await categoryStorage.get();
     setCategoryState(categoryData);
@@ -187,6 +204,10 @@ const Popup = () => {
                       </Droppable>
                     </Deck>
                   ))}
+                {Object.entries(categoryState).filter(([category]) => category !== 'default').length === 0 ? (
+                  <div className="text-center text-sm text-gray-500">분류된 링크가 없습니다.</div>
+                ) : null}
+                <CreateCategoryModal onCreateCategory={handleCreateCategory} />
               </div>
             </ContentWrapper>
           </div>
