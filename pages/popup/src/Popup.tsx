@@ -17,6 +17,7 @@ import Link from './components/Link';
 import TooltipContent from './components/TooltipContent';
 import { SmallButton } from './components/Button';
 import ContentWrapper from './components/ContentWrapper';
+import CreateCategoryModal from './components/CreateCategoryModal';
 
 const Popup = () => {
   const linkData = useStorageSuspense(linkStorage);
@@ -187,6 +188,10 @@ const Popup = () => {
                       </Droppable>
                     </Deck>
                   ))}
+                {Object.entries(categoryState).filter(([category]) => category !== 'default').length === 0 ? (
+                  <div className="text-center text-sm text-gray-500">분류된 링크가 없습니다.</div>
+                ) : null}
+                <CreateCategoryModal />
               </div>
             </ContentWrapper>
           </div>
