@@ -1,6 +1,20 @@
 const DEFULAT_FAVICON_IMG_PATH = 'popup/default-favicon.png';
 
-export default function Link({ title, favIconUrl }: { title: string; favIconUrl?: string }) {
+export default function Link({
+  title,
+  favIconUrl,
+  url,
+  index,
+  category,
+  onClickDeleteBtn,
+}: {
+  title: string;
+  favIconUrl?: string;
+  url: string;
+  index: number;
+  category: string;
+  onClickDeleteBtn: ({ url, index, category }: { url: string; index: number; category: string }) => void;
+}) {
   const MAX_TITLE_LENGTH = 25;
   const truncatedTitle = title.length > MAX_TITLE_LENGTH ? title.slice(0, MAX_TITLE_LENGTH) + '...' : title;
 
@@ -28,7 +42,11 @@ export default function Link({ title, favIconUrl }: { title: string; favIconUrl?
         </span>
       </div>
       {/* Delete Button */}
-      <button className="text-sm">x</button>
+      <button
+        className="hover:font-bold text-sm cursor-pointer"
+        onClick={() => onClickDeleteBtn({ url, index, category })}>
+        x
+      </button>
     </div>
   );
 }

@@ -57,16 +57,29 @@ const Popup = () => {
     const destinationId = destination.droppableId;
     const destinationIndex = destination.index;
 
-    // linkIndex of source
     const linkIndexOfSource = categoryState[sourceId].linkOrder[sourceIndex];
 
     const newCategoryState = { ...categoryState };
     newCategoryState[sourceId].linkOrder.splice(sourceIndex, 1);
     newCategoryState[destinationId].linkOrder.splice(destinationIndex, 0, linkIndexOfSource);
+    setCategoryState(newCategoryState);
 
-    setCategoryState(newCategoryState); // 상태 업데이트
+    // 상태 업데이트
     await categoryStorage.updateCategory(sourceId, newCategoryState[sourceId]);
     await categoryStorage.updateCategory(destinationId, newCategoryState[destinationId]);
+  };
+
+  const handleDeleteLink = async ({ url, category, index }: { url: string; category: string; index: number }) => {
+    // delete link from category storage and link storage
+    await categoryStorage.deleteLinkOrder({
+      category,
+      deleteLink: url,
+      deleteLinkOrderIndex: index,
+    });
+    await linkStorage.deleteLink(url);
+
+    const categoryData = await categoryStorage.get();
+    setCategoryState(categoryData);
   };
 
   return (
@@ -104,6 +117,10 @@ const Popup = () => {
                               placement="right">
                               <Link
                                 key={`default-${index}`}
+                                url={url}
+                                category="default"
+                                index={index}
+                                onClickDeleteBtn={handleDeleteLink}
                                 title={linkData[url].title}
                                 favIconUrl={linkData[url].favIconUrl}
                               />
@@ -151,6 +168,10 @@ const Popup = () => {
                                         />
                                       }>
                                       <Link
+                                        url={url}
+                                        category={category}
+                                        index={index}
+                                        onClickDeleteBtn={handleDeleteLink}
                                         key={`sorted-link-${title}-${url}`}
                                         title={linkData[url].title}
                                         favIconUrl={linkData[url].favIconUrl}
