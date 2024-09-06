@@ -2,7 +2,7 @@ import React, { PropsWithChildren } from 'react';
 
 type ContentWrapperProps = PropsWithChildren<{ title: string; titleActionEl?: React.ReactNode }>;
 
-const ContentWrapper = ({ title, titleActionEl, children }: ContentWrapperProps) => {
+const ContentWrapper = ({ title = 'Default Title', titleActionEl, children }: ContentWrapperProps) => {
   return (
     <aside className=" w-[29.6rem] p-[1.6rem] border border-black box-content">
       {/* Header */}

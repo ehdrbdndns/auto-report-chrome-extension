@@ -95,6 +95,7 @@ const Popup = () => {
                             <Tooltip
                               content={
                                 <TooltipContent
+                                  url={url}
                                   title={linkData[url].title}
                                   duration={linkData[url].duration}
                                   visitedCount={linkData[url].visitedCount}
@@ -143,6 +144,7 @@ const Popup = () => {
                                     <Tooltip
                                       content={
                                         <TooltipContent
+                                          url={url}
                                           title={linkData[url].title}
                                           duration={linkData[url].duration}
                                           visitedCount={linkData[url].visitedCount}

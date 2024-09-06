@@ -23,7 +23,7 @@ export default function Link({ title, favIconUrl }: { title: string; favIconUrl?
             block
             text-sm whitespace-nowrap
             overflow-hidden overflow-ellipsis
-      `}>
+        `}>
           {truncatedTitle}
         </span>
       </div>
