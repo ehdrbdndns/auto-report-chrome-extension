@@ -1,10 +1,15 @@
 import { Button, Label, Modal, TextInput } from 'flowbite-react';
 import { useState } from 'react';
 
-export default function CreateCategoryModal() {
+export default function CreateCategoryModal({
+  onCreateCategory,
+}: {
+  onCreateCategory: (category: string, error: (message: string) => void) => Promise<void>;
+}) {
   const [openModal, setOpenModal] = useState(false);
   const [category, setCategory] = useState('');
   const [isCategoryValid, setCategoryValid] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleCloseModal = () => {
     setOpenModal(false);
@@ -15,15 +20,25 @@ export default function CreateCategoryModal() {
     setCategoryValid(true);
   };
 
-  const handleCreateCategory = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleCreateCategory = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     if (!category) {
+      setErrorMessage('카테고리를 입력해주세요.');
       setCategoryValid(false);
       return;
     }
 
-    // Create category
+    // create category
+    try {
+      await onCreateCategory(category, message => setErrorMessage(message));
+    } catch (error) {
+      setCategoryValid(false);
+      console.error(error);
+      return;
+    }
+
+    handleCloseModal();
   };
 
   return (
@@ -57,7 +72,7 @@ export default function CreateCategoryModal() {
                 value={category}
                 onChange={handleChangeCategory}
                 color={isCategoryValid ? '' : 'failure'}
-                helperText={isCategoryValid ? '' : '카테고리를 입력해주세요.'}
+                helperText={isCategoryValid ? '' : errorMessage}
               />
             </div>
             <div className="w-full">
