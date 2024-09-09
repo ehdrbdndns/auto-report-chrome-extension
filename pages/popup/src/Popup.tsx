@@ -17,6 +17,7 @@ import Link from './components/Link';
 import TooltipContent from './components/TooltipContent';
 import { SmallButton } from './components/Button';
 import ContentWrapper from './components/ContentWrapper';
+import CreateCategoryModal from './components/CreateCategoryModal';
 
 const Popup = () => {
   const linkData = useStorageSuspense(linkStorage);
@@ -25,6 +26,7 @@ const Popup = () => {
 
   useEffect(() => {
     setCategoryState(categoryData);
+    console.log(categoryData);
   }, [categoryData]);
 
   // --- requestAnimationFrame 초기화
@@ -57,16 +59,44 @@ const Popup = () => {
     const destinationId = destination.droppableId;
     const destinationIndex = destination.index;
 
-    // linkIndex of source
     const linkIndexOfSource = categoryState[sourceId].linkOrder[sourceIndex];
 
     const newCategoryState = { ...categoryState };
     newCategoryState[sourceId].linkOrder.splice(sourceIndex, 1);
     newCategoryState[destinationId].linkOrder.splice(destinationIndex, 0, linkIndexOfSource);
+    setCategoryState(newCategoryState);
 
-    setCategoryState(newCategoryState); // 상태 업데이트
+    // 상태 업데이트
     await categoryStorage.updateCategory(sourceId, newCategoryState[sourceId]);
     await categoryStorage.updateCategory(destinationId, newCategoryState[destinationId]);
+  };
+
+  const handleDeleteLink = async ({ url, category, index }: { url: string; category: string; index: number }) => {
+    // delete link from category storage and link storage
+    await categoryStorage.deleteLinkOrder({
+      category,
+      deleteLink: url,
+      deleteLinkOrderIndex: index,
+    });
+    await linkStorage.deleteLink(url);
+
+    const categoryData = await categoryStorage.get();
+    setCategoryState(categoryData);
+  };
+
+  const handleCreateCategory = async (category: string, error: (message: string) => void) => {
+    if (categoryState[category]) {
+      error('이미 존재하는 카테고리입니다.');
+      throw new Error('이미 존재하는 카테고리입니다.');
+    }
+
+    await categoryStorage.updateCategory(category, {
+      title: category,
+      linkOrder: [],
+    });
+
+    const categoryData = await categoryStorage.get();
+    setCategoryState(categoryData);
   };
 
   return (
@@ -95,6 +125,7 @@ const Popup = () => {
                             <Tooltip
                               content={
                                 <TooltipContent
+                                  url={url}
                                   title={linkData[url].title}
                                   duration={linkData[url].duration}
                                   visitedCount={linkData[url].visitedCount}
@@ -103,6 +134,10 @@ const Popup = () => {
                               placement="right">
                               <Link
                                 key={`default-${index}`}
+                                url={url}
+                                category="default"
+                                index={index}
+                                onClickDeleteBtn={handleDeleteLink}
                                 title={linkData[url].title}
                                 favIconUrl={linkData[url].favIconUrl}
                               />
@@ -143,12 +178,17 @@ const Popup = () => {
                                     <Tooltip
                                       content={
                                         <TooltipContent
+                                          url={url}
                                           title={linkData[url].title}
                                           duration={linkData[url].duration}
                                           visitedCount={linkData[url].visitedCount}
                                         />
                                       }>
                                       <Link
+                                        url={url}
+                                        category={category}
+                                        index={index}
+                                        onClickDeleteBtn={handleDeleteLink}
                                         key={`sorted-link-${title}-${url}`}
                                         title={linkData[url].title}
                                         favIconUrl={linkData[url].favIconUrl}
@@ -164,6 +204,10 @@ const Popup = () => {
                       </Droppable>
                     </Deck>
                   ))}
+                {Object.entries(categoryState).filter(([category]) => category !== 'default').length === 0 ? (
+                  <div className="text-center text-sm text-gray-500">분류된 링크가 없습니다.</div>
+                ) : null}
+                <CreateCategoryModal onCreateCategory={handleCreateCategory} />
               </div>
             </ContentWrapper>
           </div>
