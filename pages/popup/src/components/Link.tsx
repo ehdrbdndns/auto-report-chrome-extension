@@ -15,7 +15,7 @@ export default function Link({
   category: string;
   onClickDeleteBtn: ({ url, index, category }: { url: string; index: number; category: string }) => void;
 }) {
-  const MAX_TITLE_LENGTH = 25;
+  const MAX_TITLE_LENGTH = 20;
   const truncatedTitle = title.length > MAX_TITLE_LENGTH ? title.slice(0, MAX_TITLE_LENGTH) + '...' : title;
 
   return (

@@ -1,6 +1,6 @@
 import { categoryStorage, linkStorage, tabStorage } from '@extension/storage';
 
-const isDev = false;
+const isDev = true;
 
 const logStorage = async () => {
   // logging storage for test
@@ -38,6 +38,7 @@ const createLinkWithCategory = async ({
   }
 
   defaultCategory.linkOrder.push(url);
+
   await categoryStorage.updateCategory('default', defaultCategory);
 };
 

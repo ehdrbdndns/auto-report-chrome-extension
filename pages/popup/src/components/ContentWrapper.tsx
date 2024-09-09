@@ -4,7 +4,7 @@ type ContentWrapperProps = PropsWithChildren<{ title: string; titleActionEl?: Re
 
 const ContentWrapper = ({ title = 'Default Title', titleActionEl, children }: ContentWrapperProps) => {
   return (
-    <aside className=" w-[29.6rem] p-[1.6rem] border border-black box-content">
+    <aside className=" w-[33.6rem] p-[1.6rem] border border-black box-content">
       {/* Header */}
       <header className="flex items-ceneter justify-between">
         {/* Title */}
