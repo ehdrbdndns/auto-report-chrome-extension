@@ -1,4 +1,4 @@
-import { BaseStorage, createStorage } from './base';
+import { BaseStorage, createStorage, StorageType } from './base';
 
 export type LinkType = {
   [url: string]: {
@@ -16,7 +16,14 @@ type LinkStorage = BaseStorage<LinkType> & {
   retrieveLink: (url: string) => Promise<LinkType[string] | null>;
 };
 
-const storage = createStorage<LinkType>('url-storage-key', {});
+const storage = createStorage<LinkType>(
+  'url-storage-key',
+  {},
+  {
+    storageType: StorageType.Local,
+    liveUpdate: true,
+  },
+);
 
 export const linkStorage: LinkStorage = {
   ...storage,

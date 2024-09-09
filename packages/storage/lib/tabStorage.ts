@@ -1,4 +1,4 @@
-import { BaseStorage, createStorage } from './base';
+import { BaseStorage, createStorage, StorageType } from './base';
 
 // Tab Type
 export type TabType = {
@@ -36,7 +36,14 @@ type TabStorageType = BaseStorage<TabType> & {
 };
 
 // Todo: subscribe for categoryData when it's updated
-const storage = createStorage<TabType>('tab-storage-key', {});
+const storage = createStorage<TabType>(
+  'tab-storage-key',
+  {},
+  {
+    storageType: StorageType.Local,
+    liveUpdate: true,
+  },
+);
 
 export const tabStorage: TabStorageType = {
   ...storage,

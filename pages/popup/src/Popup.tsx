@@ -99,7 +99,12 @@ const Popup = () => {
       linkOrder: [],
     });
 
-    const categoryData = await categoryStorage.get();
+    const categoryData = categoryStorage.getSnapshot();
+
+    if (categoryData === null) {
+      throw new Error('categoryData is null');
+    }
+
     setCategoryState(categoryData);
   };
 

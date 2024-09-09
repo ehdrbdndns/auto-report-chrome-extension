@@ -1,4 +1,4 @@
-import { BaseStorage, createStorage } from './base';
+import { BaseStorage, createStorage, StorageType } from './base';
 
 export type CategoryType = {
   [category: string]: {
@@ -23,12 +23,19 @@ export type CategoryStorageType = BaseStorage<CategoryType> & {
   }) => Promise<void>;
 };
 
-const storage = createStorage<CategoryType>('category-storage-key', {
-  default: {
-    title: 'default',
-    linkOrder: [],
+const storage = createStorage<CategoryType>(
+  'category-storage-key',
+  {
+    default: {
+      title: 'default',
+      linkOrder: [],
+    },
   },
-});
+  {
+    storageType: StorageType.Local,
+    liveUpdate: true,
+  },
+);
 
 export const categoryStorage: CategoryStorageType = {
   ...storage,
