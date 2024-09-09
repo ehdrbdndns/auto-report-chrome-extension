@@ -23,11 +23,13 @@ const Popup = () => {
   const linkData = useStorageSuspense(linkStorage);
   const categoryData = useStorageSuspense(categoryStorage);
   const [categoryState, setCategoryState] = useState<CategoryType>({});
+  const [linkState, setLinkState] = useState(linkData);
 
   useEffect(() => {
-    setCategoryState(categoryData);
-    console.log(categoryData);
-  }, [categoryData]);
+    setCategoryState(JSON.parse(JSON.stringify(categoryData)));
+    setLinkState(JSON.parse(JSON.stringify(linkData)));
+    console.log(linkData);
+  }, [categoryData, linkData]);
 
   // --- requestAnimationFrame 초기화
   const [enabled, setEnabled] = useState(false);
@@ -61,7 +63,7 @@ const Popup = () => {
 
     const linkIndexOfSource = categoryState[sourceId].linkOrder[sourceIndex];
 
-    const newCategoryState = { ...categoryState };
+    const newCategoryState = JSON.parse(JSON.stringify(categoryState));
     newCategoryState[sourceId].linkOrder.splice(sourceIndex, 1);
     newCategoryState[destinationId].linkOrder.splice(destinationIndex, 0, linkIndexOfSource);
     setCategoryState(newCategoryState);
@@ -78,10 +80,12 @@ const Popup = () => {
       deleteLink: url,
       deleteLinkOrderIndex: index,
     });
-    await linkStorage.deleteLink(url);
-
     const categoryData = await categoryStorage.get();
     setCategoryState(categoryData);
+
+    await linkStorage.deleteLink(url);
+    const linkData = await linkStorage.get();
+    setLinkState(linkData);
   };
 
   const handleCreateCategory = async (category: string, error: (message: string) => void) => {
@@ -126,9 +130,9 @@ const Popup = () => {
                               content={
                                 <TooltipContent
                                   url={url}
-                                  title={linkData[url].title}
-                                  duration={linkData[url].duration}
-                                  visitedCount={linkData[url].visitedCount}
+                                  title={linkState[url].title}
+                                  duration={linkState[url].duration}
+                                  visitedCount={linkState[url].visitedCount}
                                 />
                               }
                               placement="right">
@@ -138,8 +142,8 @@ const Popup = () => {
                                 category="default"
                                 index={index}
                                 onClickDeleteBtn={handleDeleteLink}
-                                title={linkData[url].title}
-                                favIconUrl={linkData[url].favIconUrl}
+                                title={linkState[url].title}
+                                favIconUrl={linkState[url].favIconUrl}
                               />
                             </Tooltip>
                           </div>
@@ -179,9 +183,9 @@ const Popup = () => {
                                       content={
                                         <TooltipContent
                                           url={url}
-                                          title={linkData[url].title}
-                                          duration={linkData[url].duration}
-                                          visitedCount={linkData[url].visitedCount}
+                                          title={linkState[url].title}
+                                          duration={linkState[url].duration}
+                                          visitedCount={linkState[url].visitedCount}
                                         />
                                       }>
                                       <Link
@@ -190,8 +194,8 @@ const Popup = () => {
                                         index={index}
                                         onClickDeleteBtn={handleDeleteLink}
                                         key={`sorted-link-${title}-${url}`}
-                                        title={linkData[url].title}
-                                        favIconUrl={linkData[url].favIconUrl}
+                                        title={linkState[url].title}
+                                        favIconUrl={linkState[url].favIconUrl}
                                       />
                                     </Tooltip>
                                   </div>

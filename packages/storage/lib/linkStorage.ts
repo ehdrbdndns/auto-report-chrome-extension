@@ -28,8 +28,9 @@ export const linkStorage: LinkStorage = {
   },
   deleteLink: async (url: string) => {
     await storage.set(cache => {
-      delete cache[url];
-      return cache;
+      const copiedCache = { ...cache };
+      delete copiedCache[url];
+      return copiedCache;
     });
   },
   retrieveLink: async (url: string) => {

@@ -1,6 +1,6 @@
 import { categoryStorage, linkStorage, tabStorage } from '@extension/storage';
 
-const isDev = false;
+const isDev = true;
 
 const logStorage = async () => {
   // logging storage for test
@@ -32,13 +32,23 @@ const createLinkWithCategory = async ({
   });
 
   const defaultCategory = await categoryStorage.retrieveCategory('default');
+  console.log('defaultCategory', defaultCategory);
 
   if (!defaultCategory) {
     throw new Error('default category is null');
   }
 
-  defaultCategory.linkOrder.push(url);
+  // defaultCategory.linkOrder.push(url);
+  const newLinkOrder = [...defaultCategory.linkOrder, url];
+  defaultCategory.linkOrder = newLinkOrder;
+
+  const categoryData = await categoryStorage.get();
+  console.log('categoryData', categoryData);
+
   await categoryStorage.updateCategory('default', defaultCategory);
+  const changedCategoryData = await categoryStorage.get();
+  console.log('changed defaultCategory', defaultCategory);
+  console.log('changed categoryData', changedCategoryData);
 };
 
 const getCurrentTab = async () => {

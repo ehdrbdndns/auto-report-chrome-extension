@@ -8,6 +8,7 @@ export type CategoryType = {
 };
 
 export type CategoryStorageType = BaseStorage<CategoryType> & {
+  updateAllCategories: (categories: CategoryType) => Promise<void>;
   updateCategory: (category: string, categoryData: CategoryType[string]) => Promise<void>;
   deleteCategory: (category: string) => Promise<void>;
   retrieveCategory: (category: string) => Promise<CategoryType[string] | null>;
@@ -31,8 +32,11 @@ const storage = createStorage<CategoryType>('category-storage-key', {
 
 export const categoryStorage: CategoryStorageType = {
   ...storage,
+  updateAllCategories: async (categories: CategoryType) => {
+    await storage.set(() => categories);
+  },
   updateCategory: async (category: string, categoryData: CategoryType[string]) => {
-    await storage.set(cache => {
+    await storage.set(async cache => {
       cache[category] = categoryData;
       return cache;
     });
@@ -50,7 +54,7 @@ export const categoryStorage: CategoryStorageType = {
   },
   deleteLinkOrder: async ({ category, deleteLink, deleteLinkOrderIndex }) => {
     await storage.set(cache => {
-      const linkOrder = cache[category].linkOrder;
+      const linkOrder = [...cache[category].linkOrder];
 
       const deleteIndex =
         deleteLinkOrderIndex !== undefined ? deleteLinkOrderIndex : linkOrder.findIndex(link => link === deleteLink);
