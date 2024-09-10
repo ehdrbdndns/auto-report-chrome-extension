@@ -10,14 +10,20 @@ html {
   font-variation-settings: "slnt" 0;
   padding: 2rem;
   user-select: none;
+
+  width: 687px;
+  max-width: 687px;
+  max-height: 600px;
+
 }
 
 body {
-  /* width: 687px; */
-  width: 687px;
+  /* width: 687px;
+  max-width: 687px;
+  max-height: 600px; */
+
   margin: 0;
-  /* position: relative; */
-  /* overflow-y: hidden; */
+  position: relative;
 }
 
 .text-xl {
