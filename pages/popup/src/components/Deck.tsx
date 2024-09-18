@@ -1,11 +1,12 @@
 import { PropsWithChildren, useState } from 'react';
+import DeleteCategoryModal from './DeleteCategoryModal';
 
 const TOGGLE_IMG_PATH = 'popup/toggle.svg';
 
 type DeckProps = PropsWithChildren<{ title: string }>;
 
 export default function Deck({ title, children }: DeckProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className={`group ${isOpen ? 'open' : 'close'}`}>
@@ -37,6 +38,7 @@ export default function Deck({ title, children }: DeckProps) {
         <div className="py-[1rem] border bg-gray-50 gap-[0.4rem] rounded-[0.6rem]">
           {/* Internal Data */}
           {children}
+          <DeleteCategoryModal category={title} />
         </div>
       </div>
     </div>

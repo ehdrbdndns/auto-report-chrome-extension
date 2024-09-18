@@ -46,14 +46,9 @@ export default function CreateCategoryModal({
       {/* Modal Button */}
       <div>
         {/* header */}
-        <button
-          className={`
-            w-[100%] flex justify-between items-center opacity-[0.6] hover:opacity-[0.8] transition-opacity
-            py-[0.8rem] px-[1.2rem] rounded-[0.8rem] cursor-pointer bg-black
-          `}
-          onClick={() => setOpenModal(true)}>
-          <span className="text-sm font-bold white">{'분류할 카테고리 생성 (Click)'}</span>
-        </button>
+        <Button className="w-[100%]" color="success" onClick={() => setOpenModal(true)}>
+          분류할 카테고리 생성
+        </Button>
       </div>
       {/* Modal Body */}
       <Modal show={openModal} size="lg" onClose={handleCloseModal} popup>
@@ -76,7 +71,7 @@ export default function CreateCategoryModal({
               />
             </div>
             <div className="w-full">
-              <Button color="dark" onClick={handleCreateCategory}>
+              <Button className="w-[100%] opacity-90" color="success" onClick={handleCreateCategory}>
                 카테고리 생성
               </Button>
             </div>
