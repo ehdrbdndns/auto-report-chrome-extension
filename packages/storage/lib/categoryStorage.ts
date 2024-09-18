@@ -50,8 +50,9 @@ export const categoryStorage: CategoryStorageType = {
   },
   deleteCategory: async (category: string) => {
     await storage.set(cache => {
-      delete cache[category];
-      return cache;
+      const copiedCache = { ...cache };
+      delete copiedCache[category];
+      return copiedCache;
     });
   },
   retrieveCategory: async (category: string) => {

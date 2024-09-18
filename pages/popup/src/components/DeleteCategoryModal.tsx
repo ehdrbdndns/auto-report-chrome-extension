@@ -1,3 +1,4 @@
+import { categoryStorage } from '@extension/storage';
 import { Button, Modal } from 'flowbite-react';
 import { useState } from 'react';
 
@@ -13,6 +14,7 @@ export default function DeleteCategoryModal({ category }: { category: string }) 
 
     try {
       // todo delete category
+      await categoryStorage.deleteCategory(category);
     } catch (error) {
       console.error(error);
       return;
