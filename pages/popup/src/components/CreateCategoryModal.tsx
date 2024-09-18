@@ -71,7 +71,7 @@ export default function CreateCategoryModal({
               />
             </div>
             <div className="w-full">
-              <Button className="w-[100%]" color="success" onClick={handleCreateCategory}>
+              <Button className="w-[100%] opacity-90" color="success" onClick={handleCreateCategory}>
                 카테고리 생성
               </Button>
             </div>
