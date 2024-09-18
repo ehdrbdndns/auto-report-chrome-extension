@@ -28,7 +28,6 @@ const Popup = () => {
   useEffect(() => {
     setCategoryState(JSON.parse(JSON.stringify(categoryData)));
     setLinkState(JSON.parse(JSON.stringify(linkData)));
-    console.log(linkData);
   }, [categoryData, linkData]);
 
   // --- requestAnimationFrame 초기화
@@ -80,12 +79,6 @@ const Popup = () => {
       deleteLink: url,
       deleteLinkOrderIndex: index,
     });
-    const categoryData = await categoryStorage.get();
-    setCategoryState(categoryData);
-
-    await linkStorage.deleteLink(url);
-    const linkData = await linkStorage.get();
-    setLinkState(linkData);
   };
 
   const handleCreateCategory = async (category: string, error: (message: string) => void) => {
@@ -98,14 +91,6 @@ const Popup = () => {
       title: category,
       linkOrder: [],
     });
-
-    const categoryData = categoryStorage.getSnapshot();
-
-    if (categoryData === null) {
-      throw new Error('categoryData is null');
-    }
-
-    setCategoryState(categoryData);
   };
 
   return (
