@@ -13,6 +13,7 @@ export type LinkType = {
 type LinkStorage = BaseStorage<LinkType> & {
   updateLink: (url: string, linkData: LinkType[string]) => Promise<void>;
   deleteLink: (url: string) => Promise<void>;
+  deleteLinks: (urls: string[]) => Promise<void>;
   retrieveLink: (url: string) => Promise<LinkType[string] | null>;
 };
 
@@ -46,6 +47,15 @@ export const linkStorage: LinkStorage = {
         return null;
       }
       return cache[url];
+    });
+  },
+  deleteLinks: async (urls: string[]) => {
+    await storage.set(cache => {
+      const copiedCache = { ...cache };
+      urls.forEach(url => {
+        delete copiedCache[url];
+      });
+      return copiedCache;
     });
   },
 };

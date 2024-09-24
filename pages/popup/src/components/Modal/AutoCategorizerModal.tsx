@@ -52,7 +52,13 @@ export default function AutoCategorizerModal() {
       //   apiVersion: "2023-03-15-preview"
       // })
 
-      const defaultLinkList = categoryList['default'].linkOrder.filter(link => linkList[link].duration > 1000 * 60 * 3);
+      const pendingCategoryLinks = categoryList['default'].linkOrder.filter(
+        link => linkList[link].duration > 1000 * 60 * 3,
+      );
+      const pendingDeleteLinks = categoryList['default'].linkOrder.filter(
+        link => linkList[link].duration <= 1000 * 60 * 3,
+      );
+
       const categoryKeyList = Object.keys(categoryList).filter(category => category !== 'default');
 
       const completion = await openai.chat.completions.create({
@@ -95,7 +101,7 @@ export default function AutoCategorizerModal() {
               },
               {
                 type: 'text',
-                text: `웹페이지: ${defaultLinkList.join(',')}`,
+                text: `웹페이지: ${pendingCategoryLinks.join(',')}`,
               },
             ],
           },
@@ -105,7 +111,20 @@ export default function AutoCategorizerModal() {
         max_tokens: 800,
       });
 
-      console.log(JSON.parse(completion.choices[0].message.content as string));
+      const json: { [key: string]: string[] } = JSON.parse(completion.choices[0].message.content as string);
+
+      await categoryStorage.initDefaultCategory();
+
+      // update category
+      Object.entries(json).forEach(([category, links]) => {
+        categoryStorage.updateCategory(category, {
+          title: categoryList[category].title,
+          linkOrder: [...categoryList[category].linkOrder, ...links],
+        });
+      });
+
+      // update link
+      await linkStorage.deleteLinks(pendingDeleteLinks);
     } catch (error) {
       console.error(error);
       setError('예기치 못한 문제가 발생했습니다.');
