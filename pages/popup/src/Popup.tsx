@@ -17,7 +17,8 @@ import Link from './components/Link';
 import TooltipContent from './components/TooltipContent';
 import { SmallButton } from './components/Button';
 import ContentWrapper from './components/ContentWrapper';
-import CreateCategoryModal from './components/CreateCategoryModal';
+import CreateCategoryModal from './components/Modal/CreateCategoryModal';
+import AutoCategorizerModal from './components/Modal/AutoCategorizerModal';
 
 const Popup = () => {
   const linkData = useStorageSuspense(linkStorage);
@@ -147,7 +148,7 @@ const Popup = () => {
           {/* Image */}
           <img src={chrome.runtime.getURL(RIGHT_IMG_PATH)} alt="right arrow img" />
           {/* Right */}
-          <ContentWrapper title="분류한 링크" titleActionEl={<SmallButton text="분류관리" />}>
+          <ContentWrapper title="분류한 링크" titleActionEl={<AutoCategorizerModal />}>
             <div className="flex flex-col gap-[1.2rem]">
               {Object.entries(categoryState)
                 .filter(([category]) => category !== 'default')

@@ -23,6 +23,7 @@
     "@extension/storage": "workspace:*",
     "@types/node": "^20.14.10",
     "flowbite-react": "^0.10.1",
+    "openai": "^4.62.1",
     "react-beautiful-dnd": "^13.1.1"
   },
   "devDependencies": {

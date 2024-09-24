@@ -1,5 +1,5 @@
 import { PropsWithChildren, useState } from 'react';
-import DeleteCategoryModal from './DeleteCategoryModal';
+import DeleteCategoryModal from './Modal/DeleteCategoryModal';
 
 const TOGGLE_IMG_PATH = 'popup/toggle.svg';
 

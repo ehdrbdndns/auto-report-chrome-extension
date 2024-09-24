@@ -21,6 +21,7 @@ export type CategoryStorageType = BaseStorage<CategoryType> & {
     deleteLink: string;
     deleteLinkOrderIndex?: number;
   }) => Promise<void>;
+  initDefaultCategory: () => Promise<void>;
 };
 
 const storage = createStorage<CategoryType>(
@@ -70,6 +71,12 @@ export const categoryStorage: CategoryStorageType = {
       linkOrder.splice(deleteIndex, 1);
 
       cache[category].linkOrder = linkOrder;
+      return cache;
+    });
+  },
+  initDefaultCategory: async () => {
+    await storage.set(cache => {
+      cache.default.linkOrder = [];
       return cache;
     });
   },
