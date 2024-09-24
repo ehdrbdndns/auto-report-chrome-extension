@@ -6,7 +6,8 @@
       "@src/*": ["src/*"]
     },
     "jsx": "react-jsx",
-    "types": ["chrome"]
+    "types": ["chrome"],
+    "module": "ES2020"
   },
   "include": ["src"]
 }
