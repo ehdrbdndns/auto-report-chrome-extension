@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from 'react';
 
 import '@src/Popup.css';
@@ -15,10 +14,10 @@ import Deck from './components/Deck';
 import Info from './components/Info';
 import Link from './components/Link';
 import TooltipContent from './components/TooltipContent';
-import { SmallButton } from './components/Button';
 import ContentWrapper from './components/ContentWrapper';
 import CreateCategoryModal from './components/Modal/CreateCategoryModal';
 import AutoCategorizerModal from './components/Modal/AutoCategorizerModal';
+import AutoReportModal from './components/Modal/AutoReportModal';
 
 const Popup = () => {
   const linkData = useStorageSuspense(linkStorage);
@@ -95,110 +94,113 @@ const Popup = () => {
   };
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <section>
-        {/* Header */}
-        <header className="block mb-[1.6rem]">
-          <h1 className="text-xl font-bold black">자동 보고서 생성기</h1>
-        </header>
-        {/* Main */}
-        <div className="flex gap-[1.6rem]">
-          {/* Left */}
-          <ContentWrapper title="추적한 링크" titleActionEl={<Info />}>
-            <Droppable droppableId="default">
-              {provided => (
-                <div ref={provided.innerRef} {...provided.droppableProps}>
-                  {categoryState['default']['linkOrder'].map((url, index) => (
-                    <Draggable key={`default-${url}`} draggableId={`default-link-${url}`} index={index}>
-                      {provided => (
-                        <div
-                          className="[&>.w-fit]:w-[100%]"
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}>
-                          <Tooltip
-                            content={
-                              <TooltipContent
+    <div className="flex flex-col gap-[1.6rem]">
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <section>
+          {/* Header */}
+          <header className="block mb-[1.6rem]">
+            <h1 className="text-xl font-bold black">자동 보고서 생성기</h1>
+          </header>
+          {/* Main */}
+          <div className="flex gap-[1.6rem]">
+            {/* Left */}
+            <ContentWrapper title="추적한 링크" titleActionEl={<Info />}>
+              <Droppable droppableId="default">
+                {provided => (
+                  <div ref={provided.innerRef} {...provided.droppableProps}>
+                    {categoryState['default']['linkOrder'].map((url, index) => (
+                      <Draggable key={`default-${url}`} draggableId={`default-link-${url}`} index={index}>
+                        {provided => (
+                          <div
+                            className="[&>.w-fit]:w-[100%]"
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}>
+                            <Tooltip
+                              content={
+                                <TooltipContent
+                                  url={url}
+                                  title={linkState[url].title}
+                                  duration={linkState[url].duration}
+                                  visitedCount={linkState[url].visitedCount}
+                                />
+                              }
+                              placement="right">
+                              <Link
+                                key={`default-${index}`}
                                 url={url}
+                                category="default"
+                                index={index}
+                                onClickDeleteBtn={handleDeleteLink}
                                 title={linkState[url].title}
-                                duration={linkState[url].duration}
-                                visitedCount={linkState[url].visitedCount}
+                                favIconUrl={linkState[url].favIconUrl}
                               />
-                            }
-                            placement="right">
-                            <Link
-                              key={`default-${index}`}
-                              url={url}
-                              category="default"
-                              index={index}
-                              onClickDeleteBtn={handleDeleteLink}
-                              title={linkState[url].title}
-                              favIconUrl={linkState[url].favIconUrl}
-                            />
-                          </Tooltip>
-                        </div>
-                      )}
-                    </Draggable>
+                            </Tooltip>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </ContentWrapper>
+            {/* Image */}
+            <img src={chrome.runtime.getURL(RIGHT_IMG_PATH)} alt="right arrow img" />
+            {/* Right */}
+            <ContentWrapper title="분류한 링크" titleActionEl={<AutoCategorizerModal />}>
+              <div className="flex flex-col gap-[1.2rem]">
+                {Object.entries(categoryState)
+                  .filter(([category]) => category !== 'default')
+                  .map(([category, { title, linkOrder }]) => (
+                    <Deck key={category} title={title}>
+                      <Droppable droppableId={category}>
+                        {provided => (
+                          <div className="min-h-10" ref={provided.innerRef} {...provided.droppableProps}>
+                            {/* Dropable */}
+                            {linkOrder.map((url, index) => (
+                              <Draggable
+                                key={`${title}-link-${index}`}
+                                draggableId={`${title}-link-${index}`}
+                                index={index}>
+                                {provided => (
+                                  <div
+                                    className="[&>.w-fit]:w-[100%]"
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}>
+                                    <Tooltip content={''} arrow={false} placement="left">
+                                      <Link
+                                        url={url}
+                                        category={category}
+                                        index={index}
+                                        onClickDeleteBtn={handleDeleteLink}
+                                        key={`sorted-link-${title}-${url}`}
+                                        title={linkState[url].title}
+                                        favIconUrl={linkState[url].favIconUrl}
+                                      />
+                                    </Tooltip>
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    </Deck>
                   ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </ContentWrapper>
-          {/* Image */}
-          <img src={chrome.runtime.getURL(RIGHT_IMG_PATH)} alt="right arrow img" />
-          {/* Right */}
-          <ContentWrapper title="분류한 링크" titleActionEl={<AutoCategorizerModal />}>
-            <div className="flex flex-col gap-[1.2rem]">
-              {Object.entries(categoryState)
-                .filter(([category]) => category !== 'default')
-                .map(([category, { title, linkOrder }]) => (
-                  <Deck key={category} title={title}>
-                    <Droppable droppableId={category}>
-                      {provided => (
-                        <div className="min-h-10" ref={provided.innerRef} {...provided.droppableProps}>
-                          {/* Dropable */}
-                          {linkOrder.map((url, index) => (
-                            <Draggable
-                              key={`${title}-link-${index}`}
-                              draggableId={`${title}-link-${index}`}
-                              index={index}>
-                              {provided => (
-                                <div
-                                  className="[&>.w-fit]:w-[100%]"
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}>
-                                  <Tooltip content={''} arrow={false} placement="left">
-                                    <Link
-                                      url={url}
-                                      category={category}
-                                      index={index}
-                                      onClickDeleteBtn={handleDeleteLink}
-                                      key={`sorted-link-${title}-${url}`}
-                                      title={linkState[url].title}
-                                      favIconUrl={linkState[url].favIconUrl}
-                                    />
-                                  </Tooltip>
-                                </div>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  </Deck>
-                ))}
-              {Object.entries(categoryState).filter(([category]) => category !== 'default').length === 0 ? (
-                <div className="text-center text-sm text-gray-500">분류된 링크가 없습니다.</div>
-              ) : null}
-              <CreateCategoryModal onCreateCategory={handleCreateCategory} />
-            </div>
-          </ContentWrapper>
-        </div>
-      </section>
-    </DragDropContext>
+                {Object.entries(categoryState).filter(([category]) => category !== 'default').length === 0 ? (
+                  <div className="text-center text-sm text-gray-500">분류된 링크가 없습니다.</div>
+                ) : null}
+                <CreateCategoryModal onCreateCategory={handleCreateCategory} />
+              </div>
+            </ContentWrapper>
+          </div>
+        </section>
+      </DragDropContext>
+      <AutoReportModal />
+    </div>
   );
 };
 
