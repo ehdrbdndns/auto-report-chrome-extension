@@ -132,7 +132,7 @@ export default function AutoReportModal() {
       });
 
       const json: { [key: string]: string[] } = JSON.parse(completion.choices[0].message.content as string);
-
+      console.log(json);
       // send email
 
       // delete all link order
