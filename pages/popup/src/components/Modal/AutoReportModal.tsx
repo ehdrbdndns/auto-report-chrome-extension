@@ -77,7 +77,14 @@ export default function AutoReportModal() {
 
     try {
       // OpenAI API for not students
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const pendingReportLinks = Object.entries(categoryList)
+        .map(([category, { linkOrder }]) => {
+          if (category === 'default') return '';
+
+          return `${category}: ${linkOrder.map(url => `'${url}'`).join(', ')}\n`;
+        })
+        .join('\n');
+
       const openai = new OpenAI({
         apiKey: (import.meta as any).env.VITE_GPT_SECRET_KEY,
         dangerouslyAllowBrowser: true,
@@ -103,9 +110,9 @@ export default function AutoReportModal() {
                 
                 반환 형식
                 {
-                  카테고리1: '요약 내용'  
+        카테고리1: '요약 내용'  
                   카테고리2: '요약 내용'
-                }`,
+      }`,
               },
             ],
           },
@@ -114,7 +121,7 @@ export default function AutoReportModal() {
             content: [
               {
                 type: 'text',
-                text: '개발 지식: "https://portal.azure.com/#@kangnam.ac.kr/resource/subscriptions/2a978f32-9e00-4732-b1ba-9ccad4f2657e/budgets",\n    "https://www.youtube.com/watch?v=ZVDrH6rhzKg",\n    "https://learn.microsoft.com/en-us/answers/questions/1855030/getting-error-429-rate-limit-exceeded-error-when-t",\n    "https://leetcode.com/explore/learn/card/recursion-ii/470/divide-and-conquer/2872/",\n    "https://github.com/ehdrbdndns/auto-report-chrome-extension",\n    "https://github.com/ehdrbdndns/auto-report-chrome-extension/pulls",\n    "https://github.com/ehdrbdndns"\n인문학: "https://namu.wiki/w/%EC%86%8C%ED%81%AC%EB%9D%BC%EC%B9%98%EC%8A%A4"',
+                text: pendingReportLinks,
               },
             ],
           },
@@ -125,8 +132,6 @@ export default function AutoReportModal() {
       });
 
       const json: { [key: string]: string[] } = JSON.parse(completion.choices[0].message.content as string);
-
-      console.log(json);
 
       // send email
 
@@ -163,7 +168,7 @@ export default function AutoReportModal() {
               <div className="mb-2 block">
                 <Label htmlFor="email" value="이메일" color={isEmailValid ? '' : 'failure'} />
               </div>
-              ㄴ<span className="text-sm text-gray-600 block">{`분류된 링크들로 \n 보고서를 생성하시겠습니까?`}</span>
+              <span className="text-sm text-gray-600 block">{`분류된 링크들로 \n 보고서를 생성하시겠습니까 ? `}</span>
               <span className="text-sm text-gray-600 block">{`보고서는 메일로 전송됩니다.`}</span>
               <TextInput
                 id="email"
