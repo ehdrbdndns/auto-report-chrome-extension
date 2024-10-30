@@ -44,9 +44,17 @@ export default function AutoCategorizerModal() {
         dangerouslyAllowBrowser: true,
       });
 
-      const pendingCategoryLinks = categoryList['default'].linkOrder.filter(
-        link => linkList[link].duration > 1000 * 60 * 3,
-      );
+      let linksOver3Minutes = categoryList['default'].linkOrder.filter(link => linkList[link].duration > 1000 * 60 * 3);
+
+      let pendingCategoryLinks: string[] = [];
+      if (linksOver3Minutes.length > 15) {
+        pendingCategoryLinks = linksOver3Minutes.slice(0, 15);
+        linksOver3Minutes = linksOver3Minutes.slice(15);
+      } else {
+        pendingCategoryLinks = linksOver3Minutes;
+        linksOver3Minutes = [];
+      }
+
       const pendingDeleteLinks = categoryList['default'].linkOrder.filter(
         link => linkList[link].duration <= 1000 * 60 * 3,
       );
@@ -110,14 +118,24 @@ export default function AutoCategorizerModal() {
 
       // update category
       Object.entries(json).forEach(([category, links]) => {
-        categoryStorage.updateCategory(category, {
-          title: categoryList[category].title,
-          linkOrder: [...categoryList[category].linkOrder, ...links],
-        });
+        if (category === 'default') {
+          pendingDeleteLinks.push(...links);
+        } else {
+          categoryStorage.updateCategory(category, {
+            title: categoryList[category].title,
+            linkOrder: [...categoryList[category].linkOrder, ...links],
+          });
+        }
       });
 
-      // update link
+      // delete all default links
       await linkStorage.deleteLinks(pendingDeleteLinks);
+
+      // delete all default category links
+      await categoryStorage.updateCategory('default', {
+        title: 'default',
+        linkOrder: [...linksOver3Minutes],
+      });
     } catch (error) {
       console.error(error);
       setError('예기치 못한 문제가 발생했습니다.');
