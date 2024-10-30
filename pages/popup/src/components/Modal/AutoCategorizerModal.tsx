@@ -44,14 +44,6 @@ export default function AutoCategorizerModal() {
         dangerouslyAllowBrowser: true,
       });
 
-      // Azure OpenAI API for students
-      // const openai = new AzureOpenAI({
-      //   endpoint: "https://autoreport4168000622.openai.azure.com",
-      //   apiKey: (import.meta as any).env.VITE_AZUR_SECRET_KEY,
-      //   dangerouslyAllowBrowser: true,
-      //   apiVersion: "2023-03-15-preview"
-      // })
-
       const pendingCategoryLinks = categoryList['default'].linkOrder.filter(
         link => linkList[link].duration > 1000 * 60 * 3,
       );
@@ -108,8 +100,9 @@ export default function AutoCategorizerModal() {
         ],
         temperature: 0.7,
         top_p: 0.95,
-        max_tokens: 800,
       });
+
+      console.log(completion.choices[0].message.content);
 
       const json: { [key: string]: string[] } = JSON.parse(completion.choices[0].message.content as string);
 
