@@ -213,11 +213,9 @@ export default function AutoReportModal() {
               <div className="mb-2 block">
                 <Label htmlFor="email" value="이메일" color={isEmailValid ? '' : 'failure'} />
               </div>
-              <span className="text-sm text-gray-600 block">{`분류된 링크들로 \n 보고서를 생성하시겠습니까 ? `}</span>
-              <span className="text-sm text-gray-600 block">{`보고서는 메일로 전송됩니다.`}</span>
               <TextInput
                 id="email"
-                placeholder="분류할 카테고리를 입력해주세요."
+                placeholder="보고서를 받을 이메일을 입력해주세요."
                 required
                 value={email}
                 onChange={handleChangeEmail}
