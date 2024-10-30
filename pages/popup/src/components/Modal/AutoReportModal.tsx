@@ -1,7 +1,9 @@
+import OpenAI from 'openai';
+import { sendForm } from '@emailjs/browser';
+
+import { useCallback, useEffect, useState } from 'react';
 import { categoryStorage } from '@extension/storage';
 import { Button, Label, Modal, Spinner, TextInput } from 'flowbite-react';
-import OpenAI from 'openai';
-import { useCallback, useEffect, useState } from 'react';
 
 export default function AutoReportModal() {
   const [openModal, setOpenModal] = useState(false);
@@ -81,9 +83,11 @@ export default function AutoReportModal() {
         .map(([category, { linkOrder }]) => {
           if (category === 'default') return '';
 
-          return `${category}: ${linkOrder.map(url => `'${url}'`).join(', ')}\n`;
+          return `'${category}': ${linkOrder.map(url => `'${url}'`).join(', ')}\n`;
         })
         .join('\n');
+
+      console.log(pendingReportLinks);
 
       const openai = new OpenAI({
         apiKey: (import.meta as any).env.VITE_GPT_SECRET_KEY,
@@ -98,21 +102,23 @@ export default function AutoReportModal() {
             content: [
               {
                 type: 'text',
-                text: `당신은 내용을 읽고 요약하는 요약 봇입니다.
-                다음은 내가 설정한 카테고리별 링크 목록입니다. 
-                각 링크를 클릭하여 내용을 파악한 후, 해당 카테고리별로 요약해 주세요. 
+                text: `
+                당신은 각 카테고리의 URL을 이용해 해당 URL이 가리키는 페이지로 이동한 후 내용을 읽고 요약하는 요약 봇입니다.
+                
+                다음은 제가 설정한 카테고리별 URL 목록입니다. 
+                각 URL를 클릭하여 웹 사이트 내용을 이해하고 정리하여 카테고리별로 요약해 주세요.
+
                 요약한 내용은 각 카테고리별로 하나의 통합된 요약본으로 제공해 주세요. 
-                이 요약은 사용자가 방문했던 링크들의 요약본을 보기 위함입니다.
-                
+
                 입력 형식
-                카테고리1: 'example1.com', 'example2.com'
-                카테고리2: 'example3.com', 'example4.com'
-                
+                '카테고리1': 'example1.com', 'example2.com'
+                '카테고리2': 'example3.com', 'example4.com'
+
                 반환 형식
                 {
-        카테고리1: '요약 내용'  
-                  카테고리2: '요약 내용'
-      }`,
+                  "카테고리1": "요약 내용",
+                  "카테고리2": "요약 내용"
+                }`,
               },
             ],
           },
@@ -126,27 +132,66 @@ export default function AutoReportModal() {
             ],
           },
         ],
-        temperature: 0.7,
-        top_p: 0.95,
-        max_tokens: 800,
       });
 
+      console.log(completion.choices[0].message.content as string);
       const json: { [key: string]: string[] } = JSON.parse(completion.choices[0].message.content as string);
-      console.log(json);
-      // send email
+      // form 요소 생성
+      const format = document.createElement('form');
 
+      // email 필드 추가
+      const emailInput = document.createElement('input');
+      emailInput.type = 'hidden';
+      emailInput.name = 'email';
+      emailInput.value = email;
+      format.appendChild(emailInput);
+
+      // contents 필드 추가
+      const contentsInput = document.createElement('input');
+      contentsInput.type = 'hidden';
+      contentsInput.name = 'contents';
+      contentsInput.value = Object.entries(json).reduce((result, [category, summary]) => {
+        return (result += `
+        ${category}
+        
+        ${summary}
+
+        `);
+      }, '');
+      format.appendChild(contentsInput);
+
+      // category 필드 추가
+      const categoryInput = document.createElement('input');
+      categoryInput.type = 'hidden';
+      categoryInput.name = 'category';
+      categoryInput.value = Object.entries(categoryList).reduce((result, [category, { linkOrder }]) => {
+        if (category === 'default') return result;
+        return (result += linkOrder.map(url => `'${url}'`).join('\n'));
+      }, '');
+      format.appendChild(categoryInput);
+
+      // sendForm 함수 호출
+      await sendForm(
+        (import.meta as any).env.VITE_EMAIL_SERVICE_KEY,
+        (import.meta as any).env.VITE_EMAIL_TEMPLATE_KEY,
+        format,
+        (import.meta as any).env.VITE_EMAIL_API_KEY,
+      );
+
+      // TODO: delete all category
       // delete all link order
 
       // delete tab data
 
       // delete link data
+
+      handleCloseModal();
     } catch (error) {
       console.error(error);
       setError('예기치 못한 문제가 발생했습니다.');
     }
 
     setIsLoading(false);
-    handleCloseModal();
   };
 
   return (
@@ -168,11 +213,9 @@ export default function AutoReportModal() {
               <div className="mb-2 block">
                 <Label htmlFor="email" value="이메일" color={isEmailValid ? '' : 'failure'} />
               </div>
-              <span className="text-sm text-gray-600 block">{`분류된 링크들로 \n 보고서를 생성하시겠습니까 ? `}</span>
-              <span className="text-sm text-gray-600 block">{`보고서는 메일로 전송됩니다.`}</span>
               <TextInput
                 id="email"
-                placeholder="분류할 카테고리를 입력해주세요."
+                placeholder="보고서를 받을 이메일을 입력해주세요."
                 required
                 value={email}
                 onChange={handleChangeEmail}
