@@ -78,7 +78,7 @@ export default function AutoCategorizerModal() {
 
                 웹페이지를 분류한 결과는 다음과 같은 반환 형식으로 반환하세요. 
                 
-                반환 형식 - 예시 { 뉴스: ["https://example-news.com"], "기술": ["https://example-tech.com"] } 
+                반환 형식 - 예시 { "뉴스": ["https://example-news.com"], "기술": ["https://example-tech.com"] } 
                 
                 사용자가 제공하는 카테고리는 ','로 구분되어 입력됩니다. 
                 
